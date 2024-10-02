@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cryptography Encryption/Decryption</title>
+    <style>
+        body { 
+            background-image: url('background1.jpg');
+            background-size: cover;
+            background-position: center; 
+            font-family: Arial, sans-serif; 
+        }
+        .container { 
+            width: 70%; 
+            margin: 100px auto; 
+            padding: 35px; 
+            background: #3557c6; 
+            border-radius: 10px; 
+            box-shadow: 0px 0px 10px rgb(250, 240, 240); 
+        }
+        .input-group { 
+            margin-bottom: 20px; 
+        }
+        label { 
+            font-weight: bold; 
+        }
+        input, select, textarea { 
+            width: 100%; 
+            padding: 10px; 
+            margin-top: 5px; 
+            border: 1px solid #ccc; 
+            border-radius: 5px; 
+        }
+        button { 
+            padding: 10px 20px; 
+            background-color: #2c1e69; 
+            color: #ece8e8; 
+            border: none; 
+            border-radius: 5px; 
+            cursor: pointer; 
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Cryptography Encryption/Decryption</h2>
+        <form id="cryptoForm" method="POST" enctype="multipart/form-data" action="encrypt.php">
+            <div class="input-group">
+                <label for="inputText">Input Text:</label>
+                <textarea id="inputText" name="inputText" rows="4"></textarea>
+            </div>
+            <div class="input-group">
+                <label for="key">Key:</label>
+                <input type="text" id="key" name="key" required>
+            </div>
+            <div class="input-group">
+                <label for="cipher">Select Cipher:</label>
+                <select id="cipher" name="cipherType" required>
+                    <option value="vigenere">Vigenère Cipher</option>
+                    <option value="autoKeyVigenere">Auto-Key Vigenère Cipher</option>
+                    <option value="playfair">Playfair Cipher</option>
+                    <option value="hill">Hill Cipher</option>
+                    <option value="super">Super Encryption</option>
+                </select>
+            </div>
+            <div class="input-group">
+                <label for="operation">Operation:</label>
+                <select id="operation" name="operation" required>
+                    <option value="encrypt">Encrypt</option>
+                    <option value="decrypt">Decrypt</option>
+                </select>
+            </div>
+            <div class="input-group">
+                <label for="file">Upload File (optional):</label>
+                <input type="file" id="file" name="file">
+            </div>
+            <div class="input-group">
+                <button type="submit">Submit</button>
+            </div>
+        </form>
+        <div class="input-group">
+            <label for="outputText">Output Text:</label>
+            <textarea id="outputText" rows="4" readonly></textarea>
+        </div>
+        <div class="input-group">
+            <button id="saveFileButton" style="display: none;">Save File</button>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('cryptoForm').addEventListener('submit', function(event) {
+            event.preventDefault(); // Prevent default form submission
+
+            var formData = new FormData(this); // Gather form data
+
+            fetch('encrypt.php', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                let decodedText = atob(data.outputText); // Decode the base64-encoded response
+                document.getElementById('outputText').textContent = decodedText; // Display the result
+
+                // Show Save button
+                const saveButton = document.getElementById('saveFileButton');
+                saveButton.style.display = 'block';
+
+                // Attach event to save the file
+                saveButton.onclick = function() {
+                    const blob = new Blob([decodedText], { type: 'text/plain' });
+                    const url = window.URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.style.display = 'none';
+                    a.href = url;
+                    a.download = 'cipher_output.txt';  // Name of the downloaded file
+                    document.body.appendChild(a);
+                    a.click();
+                    window.URL.revokeObjectURL(url);
+                };
+            })
+            .catch(error => console.error('Error:', error));
+        });
+    </script>
+</body>
+</html>
